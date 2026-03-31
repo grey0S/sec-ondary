@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #070712;
+  --surface: #0f1020;
+  --neon: #00f5c8;
+  --neon-2: #bf5fff;
+  --danger: #ff3d7a;
+  --text: #e8e9ff;
+  --muted: #7a7da3;
+}
+
+@theme inline {
+  --font-sans: var(--font-orbitron), system-ui, sans-serif;
+  --font-body: var(--font-dm), system-ui, sans-serif;
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 20% -10%, rgba(191, 95, 255, 0.18), transparent),
+    radial-gradient(900px 500px at 100% 20%, rgba(0, 245, 200, 0.12), transparent), var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.neon-border {
+  box-shadow: 0 0 0 1px rgba(0, 245, 200, 0.35), 0 0 24px rgba(0, 245, 200, 0.12);
+}
+
+.neon-border-magenta {
+  box-shadow: 0 0 0 1px rgba(191, 95, 255, 0.45), 0 0 28px rgba(191, 95, 255, 0.15);
+}
+
+.scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(0, 245, 200, 0.55));
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 16px rgba(191, 95, 255, 0.45));
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes level-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-level-pop {
+  animation: level-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

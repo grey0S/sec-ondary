@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  VERY_EASY
+  EASY
+  MEDIUM
+  HARD
+  EXPLOSIVE
+}
+
+enum MissionKind {
+  NORMAL
+  URGENT
+  COMPETITIVE
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum DuelStatus {
+  PENDING
+  ACTIVE
+  ENDED
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  apiToken            String?   @unique
+  displayName         String
+  username            String    @unique
+  usernameChangedAt   DateTime?
+  socialCode6         String    @unique
+  xp                  Int       @default(0)
+  equippedTitle       String?
+  equippedFrame       String?
+  ownedInventory      String    @default("[]")
+  soloStreak          Int       @default(0)
+  soloStreakBest      Int       @default(0)
+  lastSoloMissionDay  String?
+  groupStreak         Int       @default(0)
+  groupStreakBest     Int       @default(0)
+  lastGroupMissionDay String?
+  victoryBadges       String    @default("[]")
+
+  missionsCreated Mission[]       @relation("MissionCreator")
+  friendshipsOut  Friendship[]    @relation("Requester")
+  friendshipsIn   Friendship[]    @relation("Addressee")
+  completions     MissionCompletion[]
+  purchases       UserPurchase[]
+  duelsCreated    Duel[]          @relation("DuelCreator")
+}
+
+model Friendship {
+  id          String             @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus   @default(PENDING)
+  createdAt   DateTime           @default(now())
+
+  requester User @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+}
+
+model Mission {
+  id                 String      @id @default(cuid())
+  createdAt          DateTime    @default(now())
+  creatorUserId      String
+  title              String
+  description        String
+  difficulty         Difficulty
+  baseXp             Int
+  minParticipants    Int
+  maxParticipants    Int
+  contextNote        String      @default("")
+  kind               MissionKind @default(NORMAL)
+  urgentDeadlineAt   DateTime?
+  expiresAt          DateTime
+  completedAt        DateTime?
+  memoryPhotoDataUrl String?
+  participantIds     String      @default("[]")
+  reactionEmoji      String?
+  competitiveDuelId  String?
+
+  creator     User                  @relation("MissionCreator", fields: [creatorUserId], references: [id], onDelete: Cascade)
+  duel        Duel?                 @relation(fields: [competitiveDuelId], references: [id], onDelete: SetNull)
+  completions MissionCompletion[]
+}
+
+model MissionCompletion {
+  id           String   @id @default(cuid())
+  missionId    String
+  userId       String
+  xpReceived   Int
+  completedAt  DateTime @default(now())
+  wasSolo      Boolean
+  wasUrgent    Boolean
+  wasExplosive Boolean
+
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt])
+}
+
+model Duel {
+  id            String     @id @default(cuid())
+  creatorId     String
+  status        DuelStatus @default(PENDING)
+  durationDays  Int
+  startedAt     DateTime?
+  endsAt        DateTime?
+  teamAUserIds  String
+  teamBUserIds  String
+  winnerTeam    Int?
+  teamAXp       Int        @default(0)
+  teamBXp       Int        @default(0)
+  invitedCode6  String?
+
+  creator  User      @relation("DuelCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  missions Mission[]
+}
+
+model ShopItem {
+  id           String  @id @default(cuid())
+  name         String
+  description  String
+  type         String
+  costXp       Int
+  rotationSlot Int
+  seasonTag    String?
+  unlockHint   String?
+}
+
+model UserPurchase {
+  id       String   @id @default(cuid())
+  userId   String
+  itemId   String
+  boughtAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+}
